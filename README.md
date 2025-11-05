@@ -15,4 +15,4 @@ Este repositorio contiene laboratorios y proyectos de la materia **Computación 
 
 ## 📂 Proyectos 💡
 
-* [Proyecto 1](Proyecto/) → Por definir
+* [Proyecto 1](Proyecto/) → Ciberseguridad Basada en Entrelazamiento: Verificación de la No-Localidad con Qiskit
