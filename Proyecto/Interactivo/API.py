@@ -65,7 +65,7 @@ st.markdown(f"""
 
 # BANNER
 if img_b64:
-    st.markdown('<div class="hero-container"><div class="hero-overlay"><h1 class="hero-title">🎛️ Comprobación de Ciberseguridad Cuántica</h1></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-container"><div class="hero-overlay"><h1 class="hero-title"> Comprobación de Ciberseguridad Cuántica</h1></div></div>', unsafe_allow_html=True)
 else:
     st.title("Comprobación de Ciberseguridad Cuántica")
 
