@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import base64
-import pandas as pd  # Necesario para tablas bonitas
+import pandas as pd  # Necesario para tablas
 import Funciones as fn 
 
 st.set_page_config(page_title="Ciberseguridad Cuántica", page_icon="⚛️", layout="wide")
@@ -19,10 +19,14 @@ def obtener_imagen_base64(ruta_imagen):
 
 img_b64 = obtener_imagen_base64("Portada.jpg")
 
-# CSS Mínimo para el Banner
+# ==============================================================================
+# ESTILOS CSS
+# ==============================================================================
 st.markdown(f"""
 <style>
     .block-container {{ padding-top: 0rem; margin-top: 1rem; }}
+    
+    /* Banner */
     .hero-container {{
         background-image: url("data:image/jpg;base64,{img_b64}");
         background-size: cover; background-position: center;
@@ -31,10 +35,35 @@ st.markdown(f"""
     }}
     .hero-overlay {{ background-color: rgba(0, 0, 0, 0.7); padding: 20px 40px; border-radius: 10px; display: inline-block; }}
     .hero-title {{ color: #FFFFFF; font-weight: 800; font-size: 3em; margin: 0; text-shadow: 2px 2px 4px #000; }}
+
+    /* Contenedores */
+    .report-container {{
+        background-color: #1E1E1E; padding: 25px; border-radius: 12px;
+        border: 1px solid #333; font-family: 'Segoe UI', sans-serif; color: #E0E0E0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }}
+    
+    /* Badges */
+    .badge {{ display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; }}
+    .badge-warning {{ background-color: rgba(255, 167, 38, 0.2); color: #FFA726; border: 1px solid #FFA726; }}
+    .badge-success {{ background-color: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid #4CAF50; }}
+    
+    /* Tablas */
+    .result-table {{ width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 14px; }}
+    .result-table th {{ text-align: left; color: #888; border-bottom: 1px solid #444; padding: 8px; }}
+    .result-table td {{ padding: 10px 8px; border-bottom: 1px solid #333; color: #DDD; }}
+    
+    /* Tarjetas Métricas */
+    .metric-card {{ background-color: #2D2D2D; padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px; border-left: 5px solid; }}
+    .metric-value {{ font-size: 28px; font-weight: 800; margin: 5px 0; }}
+    .metric-label {{ font-size: 12px; color: #AAA; text-transform: uppercase; }}
+    
+    /* Utilidades */
+    .highlight {{ color: #64B5F6; font-family: 'Courier New', monospace; font-weight: bold; }}
 </style>
 """, unsafe_allow_html=True)
 
-# MOSTRAR BANNER
+# BANNER
 if img_b64:
     st.markdown('<div class="hero-container"><div class="hero-overlay"><h1 class="hero-title">🎛️ Comprobación de Ciberseguridad Cuántica</h1></div></div>', unsafe_allow_html=True)
 else:
@@ -64,104 +93,103 @@ if modo_ejecucion == "Simulación (Local)":
     if btn_simular:
         sim = fn.obtener_simulador(escenario, nivel_ruido, protocolo)
         
-        # --- E91 (DISEÑO NATIVO LIMPIO) ---
+        # --- E91 (SIMULACIÓN) ---
         if protocolo == 'E91 (Entrelazamiento)':
             st.subheader("🔬 Protocolo E91 (Bell-CHSH)")
             S_valor, E_vals = fn.calcular_bell_e91(sim, recursos)
             
             c_log, c_graf = st.columns([1.5, 1])
             with c_log:
-                # 1. Estado de Eve (Badge Nativo)
-                if nivel_ruido > 0:
-                    st.warning(f"🕵️ **EVE DETECTADA:** Ruido inyectado al {nivel_ruido*100:.0f}%")
-                else:
-                    st.success("✅ **CANAL LIMPIO:** Sin interferencias detectadas.")
-
-                st.markdown("### 📊 Resultados de Correlación")
+                badge_eve = f'<span class="badge badge-warning">🕵️ EVE ACTIVA: RUIDO {nivel_ruido*100:.0f}%</span>' if nivel_ruido > 0 else '<span class="badge badge-success">✅ CANAL LIMPIO</span>'
                 
-                # 2. Tabla de Datos (Usando Pandas para que se vea ordenado)
-                df_resultados = pd.DataFrame({
-                    "Configuración": ["Alice 0 - Bob 0", "Alice 0 - Bob 1", "Alice 1 - Bob 0", "Alice 1 - Bob 1"],
+                if S_valor > 2.0:
+                    color_s = "#4CAF50"
+                    msg_titulo = "¡CANAL SEGURO!"
+                    msg_accion = "Correlación cuántica fuerte. <strong>Es hora de comunicarse.</strong>"
+                    icono = "✅"
+                else:
+                    color_s = "#FF5252"
+                    msg_titulo = "¡ALERTA DE SEGURIDAD!"
+                    msg_accion = "Comportamiento clásico detectado. <strong>No transmitir secretos.</strong>"
+                    icono = "🚨"
+
+                # Tabla Nativa
+                st.markdown(badge_eve, unsafe_allow_html=True)
+                df_sim = pd.DataFrame({
+                    "Configuración": ["00 (A-B)", "01 (A-B)", "10 (A-B)", "11 (A-B)"],
                     "Correlación (E)": [f"{e:.4f}" for e in E_vals]
                 })
-                st.table(df_resultados)
-
-                st.markdown("---")
-
-                # 3. Tarjeta de Acción (Usando componentes nativos)
-                # Métrica grande
-                st.metric(label="Valor S (CHSH) Calculado", value=f"{S_valor:.4f}", delta=f"{S_valor-2.0:.2f} vs Clásico")
-
-                # Mensaje de Acción
+                st.table(df_sim)
+                
+                # Tarjeta Acción
+                st.metric("Valor S (CHSH)", f"{S_valor:.4f}")
                 if S_valor > 2.0:
-                    st.success("""
-                    ### ✅ ¡CANAL SEGURO!
-                    **Acción Recomendada:** La violación de la desigualdad es clara. Puede proceder a generar la clave criptográfica.
-                    """)
+                    st.success(f"### {icono} {msg_titulo}\n{msg_accion}")
                 else:
-                    st.error("""
-                    ### 🚨 ALERTA DE SEGURIDAD
-                    **Acción Recomendada:** El canal se comporta clásicamente. **Detener transmisión y ajustar parámetros.**
-                    """)
+                    st.error(f"### {icono} {msg_titulo}\n{msg_accion}")
             
             with c_graf:
-                # Gráfico
                 fig, ax = plt.subplots(figsize=(4, 4))
-                color_s = "#4CAF50" if S_valor > 2.0 else "#FF5252"
                 ax.bar(['S'], [S_valor], color=color_s)
-                ax.axhline(2.0, color='red', linestyle='--', label='Clásico (2.0)')
-                ax.axhline(2.82, color='blue', linestyle=':', label='Cuántico (2.82)')
-                ax.set_ylim(0, 3.2); ax.legend()
+                ax.axhline(2.0, color='red', linestyle='--', linewidth=2, label='Clásico (2.0)')
+                ax.axhline(2.82, color='blue', linestyle=':', linewidth=2, label='Cuántico (2.82)')
+                
+                # Etiquetas en gráfica
+                ax.text(0.55, 2.05, 'Clásico', color='red', fontsize=9, fontweight='bold')
+                ax.text(0.55, 2.85, 'Cuántico', color='blue', fontsize=9, fontweight='bold')
+                ax.bar_label(ax.containers[0], fmt='%.3f', padding=3, fontweight='bold')
+                
+                ax.set_ylim(0, 3.5); ax.legend(loc='upper left')
                 st.pyplot(fig)
 
-        # --- BB84 (DISEÑO NATIVO LIMPIO) ---
+        # --- BB84 (SIMULACIÓN) ---
         elif protocolo == 'BB84 (Polarización)':
             st.subheader("🔐 Protocolo BB84")
             data = fn.ejecutar_bb84(sim, recursos)
             
             c_log, c_graf = st.columns([1.8, 1])
             with c_log:
-                # 1. Estado General
+                def arr_str(arr): return " ".join([str(x) for x in arr])
+                eficiencia = (data['len_clave']/data['n_bits']*100)
+                
+                # Badge Estado
                 if data['qber'] == 0:
-                    st.success("✅ **ÉXITO:** Claves idénticas. Canal seguro.")
+                    st.success("✅ **CANAL SEGURO (QBER 0%)**")
+                    accion = st.success
+                    msg_acc = "**Acción:** Proceder con la transmisión cifrada."
                 elif data['qber'] < 11:
-                    st.warning("⚠️ **ADVERTENCIA:** Ruido bajo detectado. Corregible.")
+                    st.warning(f"⚠️ **RUIDO BAJO ({data['qber']:.1f}%)**")
+                    accion = st.info
+                    msg_acc = "**Acción:** Aplicar corrección de errores y privacidad."
                 else:
-                    st.error("🚨 **ALERTA CRÍTICA:** Eve detectada. Canal comprometido.")
+                    st.error(f"🚨 **EVE DETECTADA ({data['qber']:.1f}%)**")
+                    accion = st.error
+                    msg_acc = "**Acción:** DESCARTAR CLAVE INMEDIATAMENTE."
 
+                # Reporte Texto
                 st.markdown("### 📨 Datos Transmitidos")
+                st.text(f"Alice Bits (10): {data['alice_bits'][:10]}")
+                st.text(f"Alice Bases (10):{data['alice_bases'][:10]}")
+                st.text(f"Bob Bases (10):  {data['bob_bases'][:10]}")
                 
-                # Muestras de datos (Texto formateado simple)
-                st.text(f"Alice Bits (10):  {data['alice_bits'][:10]}")
-                st.text(f"Alice Bases (10): {data['alice_bases'][:10]}")
-                st.text(f"Bob Bases (10):   {data['bob_bases'][:10]}")
+                st.markdown("### 🔑 Cribado")
+                c1, c2 = st.columns(2)
+                c1.metric("Longitud Final", f"{data['len_clave']}")
+                c2.metric("Eficiencia", f"{eficiencia:.1f}%")
                 
-                st.markdown("### 🔑 Generación de Clave")
-                col_k1, col_k2 = st.columns(2)
-                col_k1.metric("Longitud Original", f"{data['n_bits']}")
-                col_k2.metric("Longitud Final", f"{data['len_clave']}")
+                st.text_area("Muestra Clave (Alice):", str(data['alice_key'][:15]), disabled=True)
                 
-                st.caption(f"Eficiencia del cribado: {(data['len_clave']/data['n_bits']*100):.1f}%")
-
-                st.text_area("Muestra de Clave Alice (15 bits):", str(data['alice_key'][:15]), height=70, disabled=True)
-                st.text_area("Muestra de Clave Bob (15 bits):", str(data['bob_key'][:15]), height=70, disabled=True)
-
+                # Mensaje Acción
                 st.markdown("---")
-                
-                # 2. Acción Final
-                st.metric("Tasa de Error (QBER)", f"{data['qber']:.2f}%")
-                
-                if data['qber'] < 11:
-                    st.info("**Acción:** Proceder con corrección de errores y amplificación de privacidad.")
-                else:
-                    st.error("**Acción:** DESCARTAR CLAVE. La tasa de error es demasiado alta.")
+                accion(f"### Tasa de Error: {data['qber']:.2f}%\n{msg_acc}")
 
             with c_graf:
                 fig, ax = plt.subplots(figsize=(4, 5))
                 bar_color = '#FF5252' if data['qber'] > 11 else '#4CAF50'
-                ax.bar(['QBER'], [data['qber']], color=bar_color, width=0.6)
-                ax.axhline(11, color='red', linestyle='--', linewidth=2, label="Umbral")
+                bars = ax.bar(['QBER'], [data['qber']], color=bar_color, width=0.6)
+                ax.axhline(11, color='red', linestyle='--', linewidth=2)
                 ax.text(0.6, 11.5, 'Límite (11%)', color='red')
+                ax.bar_label(bars, fmt='%.1f%%', padding=3, fontweight='bold')
                 ax.set_ylim(0, 100); ax.set_ylabel("Error (%)")
                 st.pyplot(fig)
 
@@ -171,7 +199,7 @@ if modo_ejecucion == "Simulación (Local)":
 else:
     st.sidebar.markdown("---")
     st.sidebar.header("☁️ Conexión IBM Quantum")
-    user_token = st.sidebar.text_input("Ingresa tu API Token:", type="password")
+    user_token = st.sidebar.text_input("API Token:", type="password")
     
     if st.sidebar.button("📡 Conectar"):
         with st.spinner("Conectando..."):
@@ -191,12 +219,11 @@ else:
             seleccion = st.selectbox("Selecciona Computador:", opciones)
             backend_obj = next(b for b in backends if b.name == seleccion.split(" ")[0])
             
-            col1, col2 = st.columns([1, 2])
-            shots_real = col1.number_input("Shots:", 100, 4000, 1024)
-            if col2.button("⚛️ Enviar Trabajo"):
+            shots = st.number_input("Shots:", 100, 4000, 1024)
+            if st.button("⚛️ Enviar Trabajo"):
                 try:
                     with st.spinner("Enviando..."):
-                        job = fn.ejecutar_e91_real(backend_obj, shots_real)
+                        job = fn.ejecutar_e91_real(backend_obj, shots)
                         bar = st.progress(0)
                         while not job.in_final_state():
                             status = job.status()
@@ -212,9 +239,9 @@ else:
                         with clog:
                             ruido_est = 2.828 - S_real
                             
-                            st.markdown(f"### 📡 Reporte: {backend_obj.name}")
+                            st.info(f"📡 **REPORTE:** {backend_obj.name}")
                             
-                            # Tabla Nativa
+                            # Tabla Nativa para IBM
                             df_real = pd.DataFrame({
                                 "Config": ["00", "01", "10", "11"],
                                 "Correlación": [f"{e:.4f}" for e in E_vals]
@@ -235,10 +262,27 @@ else:
                                 """)
 
                         with cgraf:
+                            # --- GRÁFICO HARDWARE REAL DETALLADO ---
                             fig, ax = plt.subplots(figsize=(4, 5))
-                            ax.bar(['S Real'], [S_real], color='#9C27B0')
-                            ax.axhline(2.0, color='red', linestyle='--'); ax.axhline(2.82, color='blue', linestyle=':')
-                            ax.set_ylim(0, 3.2)
+                            
+                            # Barra
+                            bars = ax.bar(['S Real'], [S_real], color='#9C27B0', width=0.5, edgecolor='black')
+                            
+                            # Líneas Límite
+                            ax.axhline(2.0, color='red', linestyle='--', linewidth=2, label='Clásico')
+                            ax.axhline(2.82, color='blue', linestyle=':', linewidth=2, label='Cuántico')
+                            
+                            # Etiquetas de texto en el gráfico
+                            ax.text(0.55, 2.05, 'Clásico (2.0)', color='red', fontsize=9, fontweight='bold')
+                            ax.text(0.55, 2.85, 'Cuántico (~2.82)', color='blue', fontsize=9, fontweight='bold')
+                            
+                            # Valor sobre la barra
+                            ax.bar_label(bars, fmt='%.3f', padding=3, fontsize=12, fontweight='bold')
+                            
+                            ax.set_ylim(0, 3.5)
+                            ax.set_title(f"Resultados en {backend_obj.name}", fontsize=12)
+                            ax.grid(axis='y', linestyle='--', alpha=0.3)
+                            
                             st.pyplot(fig)
                 except Exception as e:
                     st.error(f"Error: {e}")
