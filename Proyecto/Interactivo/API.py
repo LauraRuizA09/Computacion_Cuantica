@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import base64
+import pandas as pd  # Necesario para tablas bonitas
 import Funciones as fn 
 
 st.set_page_config(page_title="Ciberseguridad Cuántica", page_icon="⚛️", layout="wide")
 
 # ==============================================================================
-# FUNCIÓN DE IMAGEN Y CSS
+# CARGA DE IMAGEN DE FONDO
 # ==============================================================================
 def obtener_imagen_base64(ruta_imagen):
     try:
@@ -18,35 +19,27 @@ def obtener_imagen_base64(ruta_imagen):
 
 img_b64 = obtener_imagen_base64("Portada.jpg")
 
+# CSS Mínimo para el Banner
 st.markdown(f"""
 <style>
     .block-container {{ padding-top: 0rem; margin-top: 1rem; }}
     .hero-container {{
         background-image: url("data:image/jpg;base64,{img_b64}");
         background-size: cover; background-position: center;
-        padding: 60px 20px; border-radius: 15px; margin-bottom: 25px;
-        text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        padding: 80px 20px; border-radius: 15px; margin-bottom: 30px;
+        text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }}
-    .hero-overlay {{ background-color: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 10px; display: inline-block; }}
-    .hero-title {{ color: #FFFFFF; font-weight: 800; font-size: 3em; margin: 0; }}
-    .report-container {{
-        background-color: #0E1117; padding: 20px; border-radius: 10px; border: 1px solid #303030;
-        font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.5; color: #E0E0E0;
-    }}
-    .highlight {{ color: #64B5F6; }}
-    .success-text {{ color: #4CAF50; font-weight: bold; }}
-    .danger-text {{ color: #FF5252; font-weight: bold; }}
-    .warning-text {{ color: #FFA726; font-weight: bold; }}
+    .hero-overlay {{ background-color: rgba(0, 0, 0, 0.7); padding: 20px 40px; border-radius: 10px; display: inline-block; }}
+    .hero-title {{ color: #FFFFFF; font-weight: 800; font-size: 3em; margin: 0; text-shadow: 2px 2px 4px #000; }}
 </style>
 """, unsafe_allow_html=True)
 
-# TÍTULO PRINCIPAL (BANNER)
+# MOSTRAR BANNER
 if img_b64:
     st.markdown('<div class="hero-container"><div class="hero-overlay"><h1 class="hero-title">🎛️ Comprobación de Ciberseguridad Cuántica</h1></div></div>', unsafe_allow_html=True)
 else:
-    st.title("🎛️ Comprobación de Ciberseguridad Cuántica")
+    st.title("Comprobación de Ciberseguridad Cuántica")
 
-# SELECCIÓN DE MODO
 modo_ejecucion = st.sidebar.radio("📍 Entorno de Ejecución:", ["Simulación (Local)", "Hardware Real (IBM Quantum)"])
 
 # ==============================================================================
@@ -57,7 +50,6 @@ if modo_ejecucion == "Simulación (Local)":
     with st.sidebar:
         st.markdown("---")
         st.header("⚙️ Configuración Simulación")
-        # Asegúrate de que las opciones aquí coincidan exactamente con los IF de abajo
         protocolo = st.selectbox("1. Protocolo:", ('E91 (Entrelazamiento)', 'BB84 (Polarización)'))
         escenario = st.selectbox("2. Escenario:", ('Canal Seguro (Ideal)', 'Canal Inseguro (Simulando a Eve)'))
         
@@ -69,89 +61,112 @@ if modo_ejecucion == "Simulación (Local)":
         recursos = st.slider("3. Recursos (Bits/Shots):", 50, 2000, 1000, 50)
         btn_simular = st.button("🚀 Iniciar Simulación", type="primary")
 
-    # AQUÍ COMIENZA LA LÓGICA DE EJECUCIÓN
     if btn_simular:
         sim = fn.obtener_simulador(escenario, nivel_ruido, protocolo)
         
-        # --- BLOQUE E91 ---
+        # --- E91 (DISEÑO NATIVO LIMPIO) ---
         if protocolo == 'E91 (Entrelazamiento)':
-            st.subheader("🔬 Protocolo E91 (Bell-CHSH) - Simulación")
+            st.subheader("🔬 Protocolo E91 (Bell-CHSH)")
             S_valor, E_vals = fn.calcular_bell_e91(sim, recursos)
             
             c_log, c_graf = st.columns([1.5, 1])
             with c_log:
-                estado_eve = f"🕵️ EVE ACTIVADA: Ruido al {nivel_ruido*100:.1f}%" if nivel_ruido > 0 else "✅ CANAL SEGURO"
-                conclusion = "✅ VIOLACIÓN CUÁNTICA (S > 2.0)" if S_valor > 2.0 else "🚨 COMPROMETIDO (S ≤ 2.0)"
-                reporte = f"""
-                <div class="report-container">
-                    <div class="warning-text">{estado_eve}</div><br>
-                    <div><strong>--- RESULTADOS ---</strong></div>
-                    <div>A0B0(E): <span class="highlight">{E_vals[0]:.4f}</span> | A0B1(E): <span class="highlight">{E_vals[1]:.4f}</span></div>
-                    <div>A1B0(E): <span class="highlight">{E_vals[2]:.4f}</span> | A1B1(E): <span class="highlight">{E_vals[3]:.4f}</span></div>
-                    <br>
-                    <div>Valor S: <strong>{S_valor:.4f}</strong></div>
-                    <div class="{'success-text' if S_valor > 2 else 'danger-text'}">{conclusion}</div>
-                </div>
-                """
-                st.markdown(reporte, unsafe_allow_html=True)
+                # 1. Estado de Eve (Badge Nativo)
+                if nivel_ruido > 0:
+                    st.warning(f"🕵️ **EVE DETECTADA:** Ruido inyectado al {nivel_ruido*100:.0f}%")
+                else:
+                    st.success("✅ **CANAL LIMPIO:** Sin interferencias detectadas.")
+
+                st.markdown("### 📊 Resultados de Correlación")
+                
+                # 2. Tabla de Datos (Usando Pandas para que se vea ordenado)
+                df_resultados = pd.DataFrame({
+                    "Configuración": ["Alice 0 - Bob 0", "Alice 0 - Bob 1", "Alice 1 - Bob 0", "Alice 1 - Bob 1"],
+                    "Correlación (E)": [f"{e:.4f}" for e in E_vals]
+                })
+                st.table(df_resultados)
+
+                st.markdown("---")
+
+                # 3. Tarjeta de Acción (Usando componentes nativos)
+                # Métrica grande
+                st.metric(label="Valor S (CHSH) Calculado", value=f"{S_valor:.4f}", delta=f"{S_valor-2.0:.2f} vs Clásico")
+
+                # Mensaje de Acción
+                if S_valor > 2.0:
+                    st.success("""
+                    ### ✅ ¡CANAL SEGURO!
+                    **Acción Recomendada:** La violación de la desigualdad es clara. Puede proceder a generar la clave criptográfica.
+                    """)
+                else:
+                    st.error("""
+                    ### 🚨 ALERTA DE SEGURIDAD
+                    **Acción Recomendada:** El canal se comporta clásicamente. **Detener transmisión y ajustar parámetros.**
+                    """)
             
             with c_graf:
+                # Gráfico
                 fig, ax = plt.subplots(figsize=(4, 4))
-                ax.bar(['S'], [S_valor], color='#4CAF50' if S_valor > 2 else '#FF5252')
-                ax.axhline(2.0, color='red', linestyle='--'); ax.axhline(2.82, color='blue', linestyle=':')
-                ax.set_ylim(0, 3.2); ax.set_title("Test de Bell")
+                color_s = "#4CAF50" if S_valor > 2.0 else "#FF5252"
+                ax.bar(['S'], [S_valor], color=color_s)
+                ax.axhline(2.0, color='red', linestyle='--', label='Clásico (2.0)')
+                ax.axhline(2.82, color='blue', linestyle=':', label='Cuántico (2.82)')
+                ax.set_ylim(0, 3.2); ax.legend()
                 st.pyplot(fig)
 
-        # --- BLOQUE BB84 (CORREGIDO Y ALINEADO) ---
+        # --- BB84 (DISEÑO NATIVO LIMPIO) ---
         elif protocolo == 'BB84 (Polarización)':
-            st.subheader("🔐 Protocolo BB84 - Simulación")
-            # Llamamos a la función que ahora devuelve un DICCIONARIO
+            st.subheader("🔐 Protocolo BB84")
             data = fn.ejecutar_bb84(sim, recursos)
             
             c_log, c_graf = st.columns([1.8, 1])
             with c_log:
-                def arr_str(arr): return " ".join([str(x) for x in arr])
-                eficiencia = (data['len_clave']/data['n_bits']*100)
-                msg = '<span class="success-text">ÉXITO: Canal Seguro.</span>' if data['qber'] == 0 else '<span class="danger-text">ALERTA: Eve detectada.</span>'
-                if 0 < data['qber'] < 11: msg = '<span class="warning-text">ADVERTENCIA: Ruido bajo.</span>'
+                # 1. Estado General
+                if data['qber'] == 0:
+                    st.success("✅ **ÉXITO:** Claves idénticas. Canal seguro.")
+                elif data['qber'] < 11:
+                    st.warning("⚠️ **ADVERTENCIA:** Ruido bajo detectado. Corregible.")
+                else:
+                    st.error("🚨 **ALERTA CRÍTICA:** Eve detectada. Canal comprometido.")
+
+                st.markdown("### 📨 Datos Transmitidos")
                 
-                # HTML EXACTO QUE PEDISTE
-                reporte = f"""
-                <div class="report-container">
-                    <div><strong>--- Iniciando Protocolo BB84 con {data['n_bits']} qubits ---</strong></div>
-                    <div>Alice Bits (10): <span class="highlight">{arr_str(data['alice_bits'][:10])}</span></div>
-                    <div>Alice Bases (10): <span class="highlight">{arr_str(data['alice_bases'][:10])}</span> (0=Z, 1=X)</div>
-                    <div>Bob Bases   (10): <span class="highlight">{arr_str(data['bob_bases'][:10])}</span> (0=Z, 1=X)</div>
-                    <br>
-                    <div><em>Transmitiendo... Cribando...</em></div>
-                    <br>
-                    <div><strong>--- RESULTADOS ---</strong></div>
-                    <div>Longitud original: {data['n_bits']}</div>
-                    <div>Longitud clave final: {data['len_clave']}</div>
-                    <div>Eficiencia: {eficiencia:.1f}% (Teórico ~50%)</div>
-                    <br>
-                    <div>Clave Alice (15): <span class="highlight">{arr_str(data['alice_key'][:15])}</span></div>
-                    <div>Clave Bob   (15): <span class="highlight">{arr_str(data['bob_key'][:15])}</span></div>
-                    <br>
-                    <div><strong>Tasa de Error (QBER): {data['qber']:.2f}%</strong></div>
-                    <div>{msg}</div>
-                </div>
-                """
-                st.markdown(reporte, unsafe_allow_html=True)
-            
+                # Muestras de datos (Texto formateado simple)
+                st.text(f"Alice Bits (10):  {data['alice_bits'][:10]}")
+                st.text(f"Alice Bases (10): {data['alice_bases'][:10]}")
+                st.text(f"Bob Bases (10):   {data['bob_bases'][:10]}")
+                
+                st.markdown("### 🔑 Generación de Clave")
+                col_k1, col_k2 = st.columns(2)
+                col_k1.metric("Longitud Original", f"{data['n_bits']}")
+                col_k2.metric("Longitud Final", f"{data['len_clave']}")
+                
+                st.caption(f"Eficiencia del cribado: {(data['len_clave']/data['n_bits']*100):.1f}%")
+
+                st.text_area("Muestra de Clave Alice (15 bits):", str(data['alice_key'][:15]), height=70, disabled=True)
+                st.text_area("Muestra de Clave Bob (15 bits):", str(data['bob_key'][:15]), height=70, disabled=True)
+
+                st.markdown("---")
+                
+                # 2. Acción Final
+                st.metric("Tasa de Error (QBER)", f"{data['qber']:.2f}%")
+                
+                if data['qber'] < 11:
+                    st.info("**Acción:** Proceder con corrección de errores y amplificación de privacidad.")
+                else:
+                    st.error("**Acción:** DESCARTAR CLAVE. La tasa de error es demasiado alta.")
+
             with c_graf:
-                # Gráfico Simplificado a la derecha
                 fig, ax = plt.subplots(figsize=(4, 5))
                 bar_color = '#FF5252' if data['qber'] > 11 else '#4CAF50'
                 ax.bar(['QBER'], [data['qber']], color=bar_color, width=0.6)
-                ax.axhline(11, color='red', linestyle='--', linewidth=2)
-                ax.text(0.6, 11.5, 'Umbral (11%)', color='red')
+                ax.axhline(11, color='red', linestyle='--', linewidth=2, label="Umbral")
+                ax.text(0.6, 11.5, 'Límite (11%)', color='red')
                 ax.set_ylim(0, 100); ax.set_ylabel("Error (%)")
-                ax.text(0, data['qber'] + 2, f"{data['qber']:.1f}%", ha='center', fontweight='bold')
                 st.pyplot(fig)
 
 # ==============================================================================
-# MODO 2: HARDWARE REAL IBM (SIN CAMBIOS)
+# MODO 2: HARDWARE REAL IBM
 # ==============================================================================
 else:
     st.sidebar.markdown("---")
@@ -159,12 +174,12 @@ else:
     user_token = st.sidebar.text_input("Ingresa tu API Token:", type="password")
     
     if st.sidebar.button("📡 Conectar"):
-        with st.spinner("Autenticando..."):
+        with st.spinner("Conectando..."):
             service, error = fn.conectar_ibm(user_token)
             if service:
                 st.session_state['ibm_service'] = service
                 st.session_state['backends'] = fn.obtener_backends_ibm(service)
-                st.sidebar.success("Conectado!")
+                st.sidebar.success("¡Conectado!")
             else:
                 st.sidebar.error(f"Error: {error}")
 
@@ -182,8 +197,6 @@ else:
                 try:
                     with st.spinner("Enviando..."):
                         job = fn.ejecutar_e91_real(backend_obj, shots_real)
-                        
-                        # Polling
                         bar = st.progress(0)
                         while not job.in_final_state():
                             status = job.status()
@@ -198,28 +211,34 @@ else:
                         clog, cgraf = st.columns([1.5, 1])
                         with clog:
                             ruido_est = 2.828 - S_real
-                            html_real = f"""
-                            <div class="report-container">
-                                <div class="header-text">📡 REPORTE: {backend_obj.name}</div><br>
-                                <div><strong>--- CORRELACIONES ---</strong></div>
-                                <div>E(0,0): {E_vals[0]:.4f} | E(0,1): {E_vals[1]:.4f}</div>
-                                <div>E(1,0): {E_vals[2]:.4f} | E(1,1): {E_vals[3]:.4f}</div>
-                                <br>
-                                <div>Valor S: <strong>{S_real:.4f}</strong></div>
-                                <div>Desviación (Ruido): {ruido_est:.4f}</div>
-                                <br>
-                                <div class="{'header-text' if S_real > 2 else 'danger-text'}">
-                                    {'✅ VIOLACIÓN DE BELL' if S_real > 2 else '🚨 RUIDO ALTO'}
-                                </div>
-                            </div>
-                            """
-                            st.markdown(html_real, unsafe_allow_html=True)
+                            
+                            st.markdown(f"### 📡 Reporte: {backend_obj.name}")
+                            
+                            # Tabla Nativa
+                            df_real = pd.DataFrame({
+                                "Config": ["00", "01", "10", "11"],
+                                "Correlación": [f"{e:.4f}" for e in E_vals]
+                            })
+                            st.table(df_real)
+                            
+                            st.metric("Valor S Medido", f"{S_real:.4f}", delta=f"-{ruido_est:.3f} Ruido")
+                            
+                            if S_real > 2.0:
+                                st.success("""
+                                ### ✅ VIOLACIÓN DE BELL CONFIRMADA
+                                **Acción:** El dispositivo muestra comportamiento cuántico real. Es seguro comunicarse.
+                                """)
+                            else:
+                                st.error("""
+                                ### 🚨 RUIDO EXCESIVO
+                                **Acción:** El ruido ha destruido el entrelazamiento. Cambiar de máquina o aumentar shots.
+                                """)
+
                         with cgraf:
                             fig, ax = plt.subplots(figsize=(4, 5))
                             ax.bar(['S Real'], [S_real], color='#9C27B0')
                             ax.axhline(2.0, color='red', linestyle='--'); ax.axhline(2.82, color='blue', linestyle=':')
-                            ax.set_ylim(0, 3.2); ax.legend()
-                            ax.text(0, S_real+0.05, f"{S_real:.3f}", ha='center', fontweight='bold')
+                            ax.set_ylim(0, 3.2)
                             st.pyplot(fig)
                 except Exception as e:
                     st.error(f"Error: {e}")
