@@ -73,21 +73,21 @@ Para utilizar la funcionalidad de **Hardware Real** y ejecutar tus circuitos en 
 Dirígete a [IBM Quantum Platform](https://quantum.ibm.com/) y haz clic en **"Create account"** o inicia sesión con tu ID de IBM, Google o GitHub.
 
 > **Login:**
-> ![Captura Login](Instructivo Imagenes/CreateAccount.png)
+> ![Captura Login](Instructivo%20Imagenes/CreateAccount.png)
 
 ### Paso 2: Acceder al Dashboard
 Una vez dentro, verás tu panel de control (Dashboard). En la parte superior derecha (o en el menú principal), busca la sección que dice **"API Token"**. Si no ves el código, estará oculto.
 
 > **Ubicación del Token:**
-> ![Captura Dashboard](Proyecto/Simulador/Instructivo Imagenes/Dashboard.png)
+> ![Captura Dashboard](Instructivo%20Imagenes/Dashboard.png)
 
-> ![Crear Token](Instructivo Imagenes/createTOKEN.png)
+> ![Crear Token](Instructivo%20Imagenes/createTOKEN.png)
 
 ### Paso 3: Copiar el Token
 Haz clic en el ícono de **Copiar** (dos hojitas superpuestas) que está al lado de tu Token. **No compartas este código con nadie**, es tu llave personal.
 
 > **Botón de Copiar:**
-> ![Zoom Botón Copiar](Instructivo Imagenes/TOKEN.png)
+> ![Zoom Botón Copiar](Instructivo%20Imagenes/TOKEN.png)
 
 ### Paso 4: Conectar en la App
 Vuelve a la aplicación `Streamlit` en tu navegador:
@@ -97,7 +97,7 @@ Vuelve a la aplicación `Streamlit` en tu navegador:
 3. Presiona **"📡 Conectar"**.
 
 > **Aplicación Conectada:**
-> ![App Conectada](Instructivo Imagenes/app_.png)
+> ![App Conectada](Instructivo%20Imagenes/app_.png)
 
 ---
 
