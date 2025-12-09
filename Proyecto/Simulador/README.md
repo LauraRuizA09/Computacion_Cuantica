@@ -50,9 +50,9 @@ source .venv/bin/activate
 
 ### 3. Instalar Dependencias
 Instala las librerías necesarias ejecutando el siguiente comando:
-
+```bash
 pip install streamlit qiskit qiskit-aer qiskit-ibm-runtime matplotlib pandas numpy
-
+```
 
 ## 🚀 Cómo Ejecutar la Aplicación
 Una vez instalado todo, iniciar la interfaz es muy sencillo. Asegúrate de estar dentro de la carpeta del proyecto en tu terminal y ejecuta:
@@ -73,19 +73,21 @@ Para utilizar la funcionalidad de **Hardware Real** y ejecutar tus circuitos en 
 Dirígete a [IBM Quantum Platform](https://quantum.ibm.com/) y haz clic en **"Create account"** o inicia sesión con tu ID de IBM, Google o GitHub.
 
 > **Login:**
-> ![Captura Login](ruta/a/tu/imagen_login.png)
+> ![Captura Login](Proyecto/Simulador/Instructivo Imagenes/CreateAccount.png)
 
 ### Paso 2: Acceder al Dashboard
 Una vez dentro, verás tu panel de control (Dashboard). En la parte superior derecha (o en el menú principal), busca la sección que dice **"API Token"**. Si no ves el código, estará oculto.
 
 > **Ubicación del Token:**
-> ![Captura Dashboard](ruta/a/tu/imagen_dashboard.png)
+> ![Captura Dashboard](Proyecto/Simulador/Instructivo Imagenes/Dashboard.png)
+
+> ![Crear Token](Proyecto/Simulador/Instructivo Imagenes/createTOKEN.png)
 
 ### Paso 3: Copiar el Token
 Haz clic en el ícono de **Copiar** (dos hojitas superpuestas) que está al lado de tu Token. **No compartas este código con nadie**, es tu llave personal.
 
 > **Botón de Copiar:**
-> ![Zoom Botón Copiar](ruta/a/tu/imagen_boton_copiar.png)
+> ![Zoom Botón Copiar](Proyecto/Simulador/Instructivo Imagenes/TOKEN.png)
 
 ### Paso 4: Conectar en la App
 Vuelve a la aplicación `Streamlit` en tu navegador:
@@ -95,7 +97,7 @@ Vuelve a la aplicación `Streamlit` en tu navegador:
 3. Presiona **"📡 Conectar"**.
 
 > **Aplicación Conectada:**
-> ![App Conectada](ruta/a/tu/imagen_app_conectada.png)
+> ![App Conectada](Proyecto/Simulador/Instructivo Imagenes/app_.png)
 
 ---
 
@@ -115,7 +117,7 @@ Vuelve a la aplicación `Streamlit` en tu navegador:
 Proyecto desarrollado para el evento **Quantum Science and Artificial Intelligence for Fundamental Physics (MIT & UNAL)**.
 
 * **Nestor Mendoza Rueda** - [GitHub Profile](https://github.com/tu-usuario)
-* **Laura Ruiz Arango** - [GitHub Profile](https://github.com/tu-usuario)
+* **Laura Ruiz Arango** - [GitHub Profile](https://github.com/LauraRuizA09)
 
 <br>
 
