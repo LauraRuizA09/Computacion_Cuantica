@@ -117,7 +117,7 @@ Vuelve a la aplicación `Streamlit` en tu navegador:
 Proyecto desarrollado para el evento **Quantum Science and Artificial Intelligence for Fundamental Physics (MIT & UNAL)**.
 
 * **Nestor Mendoza Rueda** - [GitHub Profile](https://github.com/tu-usuario)
-* **Laura Ruiz Arango** - [GitHub Profile](https://github.com/tu-usuario)
+* **Laura Ruiz Arango** - [GitHub Profile](https://github.com/LauraRuizA09)
 
 <br>
 
